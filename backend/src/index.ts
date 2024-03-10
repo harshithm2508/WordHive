@@ -15,6 +15,8 @@ app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
 
+
+//  Route for User SignUp
 app.post('/api/v1/user/signup',async (c)=>{
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -45,8 +47,38 @@ app.post('/api/v1/user/signup',async (c)=>{
   }
 })
 
-app.post('/api/v1/user/signin',(c)=>{
-  return c.text("User is signing in")
+
+
+//  Route for User Sign In
+app.post('/api/v1/user/signin',async (c)=>{
+
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate())
+
+  const body = await c.req.json();
+
+  try{
+    const user = await prisma.user.findFirst({
+      where : {
+        email : body.email,
+        password : body.password
+      }
+    })
+
+    if(!user){
+      c.status(403);
+      return c.text("Invalid Credentials")
+    }
+
+    const token = await sign({
+      id : user.id
+    },c.env.JWT_SECRET)
+
+    return c.text(token)
+  }catch(e){
+    console.log("There was an error : ",e)
+  }
 })
 
 app.post('/api/v1/blog',(c)=>{
