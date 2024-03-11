@@ -10,20 +10,102 @@ const blogRouter = new Hono<{
 }>();
 
 
-blogRouter.post('/api/v1/blog',(c)=>{
-    return c.text("User is uploading blog")
+blogRouter.post('/',async (c)=>{
+
+    try{
+        const body = await c.req.json();
+
+    const prisma = new PrismaClient({
+        datasourceUrl: c.env.DATABASE_URL,
+      }).$extends(withAccelerate())
+
+      const blog = await prisma.post.create({
+            data : {
+                title : body.title,
+                content : body.content,
+                authorId : body.authorId
+            }
+      })
+
+      return c.json({
+        id : body.id
+      })
+    }catch(e){
+        return c.json({
+            error : e
+        })
+    }
   })
   
-blogRouter.put('/api/v1/blog',(c)=>{
-    return c.text('User is editing a blog')
+blogRouter.put('/',async (c)=>{
+    try{
+        const body = await c.req.json();
+
+    const prisma = new PrismaClient({
+        datasourceUrl: c.env.DATABASE_URL,
+      }).$extends(withAccelerate())
+
+      const blog = await prisma.post.update({
+            where : {
+                id : body.id
+            },
+
+            data : {
+                title : body.title,
+                content : body.content
+            }
+      })
+
+      return c.json({
+        id : body.id
+      })
+    }catch(e){
+        return c.json({
+            error : e
+        })
+    }
   })
   
-  blogRouter.get('/api/v1/blog/:id',(c)=>{
-    return c.text("User is getting a  blog by id")
+
+  //    getting the first blog
+  blogRouter.get('/',async (c)=>{
+    try{
+        const body = await c.req.json();
+
+        const prisma = new PrismaClient({
+            datasourceUrl: c.env.DATABASE_URL,
+        }).$extends(withAccelerate())
+
+        const blog = await prisma.post.findFirst({
+            where : {
+                id : body.id
+            }
+        })
+
+        return c.json({
+        blog
+        })
+        }catch(e){
+            return c.json({
+            error : e
+        })
+    }
   })
   
-  blogRouter.get('/api/v1/blog/bulk',(c)=>{
-    return c.text("User will be displayed all the blogs")
+
+  // getting all the blogs
+  blogRouter.get('/bulk',async (c)=>{
+    try{
+        const prisma = new PrismaClient({
+            datasourceUrl: c.env.DATABASE_URL,
+        }).$extends(withAccelerate())
+
+        const blogs = await prisma.post.findMany();
+    }catch(e){
+        return c.json({
+            error : e
+        })
+    }
   })
   
 
