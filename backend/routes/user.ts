@@ -3,7 +3,7 @@ import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
 import { verify, sign, decode } from "hono/jwt";
 import z from "zod";
-import {signUpInput} from "../../common/zod";
+import { signupInput, signinInput, createPostInput, updatePostInput } from '@harshithm2508/wordhivecommon'
 
 
 const userRouter = new Hono<{
@@ -25,7 +25,7 @@ userRouter.post('/signup',async (c)=>{
   
     const body = await c.req.json();
 
-    const {success} = signUpInput.safeParse(body);
+    const {success} = signupInput.safeParse(body);
 
     if(!success){
       c.status(411)
@@ -66,6 +66,8 @@ userRouter.post('/signup',async (c)=>{
     }).$extends(withAccelerate())
   
     const body = await c.req.json();
+
+    const {success} = signinInput.safeParse(body);
   
     try{
       const user = await prisma.user.findFirst({
