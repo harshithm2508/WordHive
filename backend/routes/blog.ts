@@ -3,6 +3,8 @@ import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
 import { use } from "hono/jsx";
 import { verify, sign, decode } from "hono/jwt";
+import { signinInput, signupInput, createPostInput, updatePostInput} from '@harshithm2508/wordhivecommon'
+
 const blogRouter = new Hono<{
     Bindings : {
         DATABASE_URL : string,
@@ -13,78 +15,75 @@ const blogRouter = new Hono<{
 }>();
 
 
-blogRouter.use('/*',async (c,next)=>{
-    const authHeader = c.req.header("authorization") || "";
-    const user = await verify(authHeader,c.env.JWT_SECRET);
-    if(user){
-        c.set("userId",user.id);
-        await next();
-    }else{
-        c.status(403);
-        return c.json({
-            error : "You are not authorized to do this operation"
-        })
-    }
+blogRouter.use('/*', async (c, next) => {
+	const jwt = c.req.header('Authorization');
+	if (!jwt) {
+		c.status(401);
+		return c.json({ error: "unauthorized" });
+	}
+	const payload = await verify(jwt, c.env.JWT_SECRET);
+	if (!payload) {
+		c.status(401);
+		return c.json({ error: "unauthorized" });
+	}
+	c.set('userId', payload.id);
+	await next()
 })
 
 
-blogRouter.post('/',async (c)=>{
+blogRouter.post('/', async (c) => {
+	const userId = c.get('userId');
+	const prisma = new PrismaClient({
+		datasourceUrl: c.env?.DATABASE_URL	,
+	}).$extends(withAccelerate());
 
-    try{
-        const body = await c.req.json();
+	const body = await c.req.json();
+	const { success } = createPostInput.safeParse(body);
+	if (!success) {
+		c.status(400);
+		return c.json({ error: "invalid input" });
+	}
 
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-      }).$extends(withAccelerate())
-
-      const blog = await prisma.post.create({
-            data : {
-                title : body.title,
-                content : body.content,
-                authorId : c.get("userId")
-            }
-      })
-
-      return c.json({
-        id : c.get("userId")
-      })
-    }catch(e){
-        return c.json({
-            error : e
-        })
-    }
-  })
+	const post = await prisma.post.create({
+		data: {
+			title: body.title,
+			content: body.content,
+			authorId: userId
+		}
+	});
+	return c.json({
+		id: post.id
+	});
+})
 
 
   
-blogRouter.put('/',async (c)=>{
-    try{
-        const body = await c.req.json();
+blogRouter.put('/', async (c) => {
+	const userId = c.get('userId');
+	const prisma = new PrismaClient({
+		datasourceUrl: c.env?.DATABASE_URL	,
+	}).$extends(withAccelerate());
 
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-      }).$extends(withAccelerate())
+	const body = await c.req.json();
+	const { success } = updatePostInput.safeParse(body);
+	if (!success) {
+		c.status(400);
+		return c.json({ error: "invalid input" });
+	}
 
-      const blog = await prisma.post.update({
-            where : {
-                id : body.id
-            },
+	prisma.post.update({
+		where: {
+			id: body.id,
+			authorId: userId
+		},
+		data: {
+			title: body.title,
+			content: body.content
+		}
+	});
 
-            data : {
-                title : body.title,
-                content : body.content
-            }
-      })
-
-      return c.json({
-        id : c.get('userId')
-      })
-    }catch(e){
-        return c.json({
-            error : e
-        })
-    }
-  })
+	return c.text('updated post');
+});
 
 
 

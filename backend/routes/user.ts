@@ -30,7 +30,7 @@ userRouter.post('/signup',async (c)=>{
     if(!success){
       c.status(411)
       return c.json({
-        error : "User input was not right "
+        error : "User Sign Up input was not right "
       })
     }
   
@@ -68,6 +68,13 @@ userRouter.post('/signup',async (c)=>{
     const body = await c.req.json();
 
     const {success} = signinInput.safeParse(body);
+
+    if(!success){
+      c.status(411)
+      return c.json({
+        error : "User input was not right "
+      })
+    }
   
     try{
       const user = await prisma.user.findFirst({
