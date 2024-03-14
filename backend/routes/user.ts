@@ -100,3 +100,6 @@ userRouter.post('/signup',async (c)=>{
   })
 
 export default userRouter;
+
+
+//  Erwing JWT : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU4YTY1M2MwLTUxZDUtNGI4Ni05MDlmLWU0NDdlMmZkNzE2NSJ9.XrY01wXAEqZ-4W4sID7GVdnKsoJ4lJ0Esb4EosbLVyY

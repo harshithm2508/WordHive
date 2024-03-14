@@ -27,7 +27,6 @@ blogRouter.use('/*', async (c, next) => {
 		return c.json({ error: "unauthorized" });
 	}
 	c.set('userId', payload.id);
-	console.log("hel")
 	await next()
 })
 
@@ -71,8 +70,8 @@ blogRouter.put('/', async (c) => {
 		c.status(400);
 		return c.json({ error: "invalid input" });
 	}
-
-	prisma.post.update({
+	console.log(body.id)
+	const updating = await prisma.post.update({
 		where: {
 			id: body.id,
 			authorId: userId
@@ -83,6 +82,7 @@ blogRouter.put('/', async (c) => {
 		}
 	});
 
+	console.log("")
 	return c.text('updated post');
 });
 
