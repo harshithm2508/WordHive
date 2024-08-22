@@ -44,8 +44,38 @@ app.post('/api/v1/user/signup',async (c) => {
   }
 })
 
-app.post('api/v1/user/signin', (c) => { 
-  return c.text("Sign In route")
+app.post('api/v1/user/signin', async (c) => { 
+
+  const body =  await c.req.json();
+
+  const prisma = new PrismaClient({
+    datasourceUrl : c.env.DATABASE_URL,
+  }).$extends(withAccelerate())
+
+  try{
+    const user = await prisma.user.findFirst({
+      where : {
+        username : body.username,
+        password : body.password,
+      }
+    })
+
+    if(!user) {
+      c.status(403);
+      return c.json({
+        message : "Incorrect credentials"
+      })
+    }
+
+    const jwt =  await sign({
+      id : user.id
+    }, c.env.JWT_SECRET);
+
+    return c.text(jwt);
+  }catch(e){
+    c.status(411);
+    return c.text("Invalid");
+  }
 })
 
 app.post('api/v1/blog', (c) => {
@@ -65,6 +95,3 @@ app.get('api/v1/blog/bulk', (c)=>{
 })
 
 export default app;
-
-
-// jwt for harshith : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NH0.AUIEs1lI8DEQoPeHmLtaAB1H7fSq_7ytG_6ndHPNTvM
