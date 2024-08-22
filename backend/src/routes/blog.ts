@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import { decode,sign, verify } from 'hono/jwt'
+import { createPostInput, CreatePostType, updatePostInput, UpdatePostType } from '@harshithm2508/wordhivecommon'
 
 
 const blogRouter = new Hono<{
@@ -41,6 +42,15 @@ const blogRouter = new Hono<{
   blogRouter.post('/', async (c) => {
 
     const body = await c.req.json();
+    const { success } = await createPostInput.safeParse(body);
+
+    if(!success){
+      c.status(400);
+      return c.json({
+        message : "Wrong Input types"
+      })
+    }
+
     const authroId = c.get('userId')
     
     const prisma = new PrismaClient({
@@ -64,6 +74,13 @@ const blogRouter = new Hono<{
   //  Updating a blog
   blogRouter.put('/', async (c) => {
     const body = await c.req.json();
+    const { success } = await updatePostInput.safeParse(body);
+    if(!success){
+      c.status(400);
+      return c.json({
+        message : "Wrong Input Types"
+      })
+    }
     const authroId = c.get('userId')
     
     const prisma = new PrismaClient({
