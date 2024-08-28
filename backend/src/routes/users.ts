@@ -1,11 +1,12 @@
 import { Hono } from "hono";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
-import { use } from "hono/jsx";
+import { verify, sign, decode } from "hono/jwt";
 
 export const userRouter = new Hono<{
     Bindings : {
         DATABASE_URL : string,
+        SECRET_KEY : string
     }
 }>();
 
@@ -25,8 +26,13 @@ userRouter.post('/signup',async (c)=>{
                 password : body.password
             }
         })
+
+        const jwt = await sign({
+            id : user.id
+        },c.env.SECRET_KEY)
+        
         console.log(`User successfully create with username : ${user.username}`)
-        return c.text(`User successfully create with username : ${user.username}`)
+        return c.text(jwt)
     }catch(e){
         c.status(411);
         return c.text("There was an error while signing up")
@@ -45,12 +51,20 @@ userRouter.post('/signin',async (c)=>{
         const user = await prisma.user.findUnique({
             where : {
                 username : body.username,
-                password : body.password
+                password : body.password,
             }
         })
+        
+        if(!user){
+            c.status(403);
+            return c.text("User is not found")
+        }
 
+        const jwt = await sign({
+            id : user?.id
+        },c.env.SECRET_KEY)
         console.log("User logged in")
-        return c.text("Correct credentials")
+        return c.text(jwt)
     }catch(e){
         c.status(401)
         return c.text("User credentials are incorrect or user does not exist.")
