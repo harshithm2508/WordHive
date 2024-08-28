@@ -1,11 +1,43 @@
 import { Hono } from "hono";
+import { PrismaClient } from "@prisma/client/edge";
+import { withAccelerate } from "@prisma/extension-accelerate";
+import { use } from "hono/jsx";
 
-export const userRouter = new Hono();
+export const userRouter = new Hono<{
+    Bindings : {
+        DATABASE_URL : string,
+    }
+}>();
 
-userRouter.post('/signup',(c)=>{
-    return c.text("User signs up in this page.")
+userRouter.post('/signup',async (c)=>{
+
+    const prisma = new PrismaClient({
+        datasourceUrl : c.env.DATABASE_URL,
+    }).$extends(withAccelerate());
+
+    const body = await c.req.json();
+
+    try{
+        const user = await prisma.user.create({
+            data : {
+                name : body.name,
+                username : body.username,
+                password : body.password
+            }
+        })
+        console.log(`User successfully create with username : ${user.username}`)
+        return c.text(`User successfully create with username : ${user.username}`)
+    }catch(e){
+        c.status(411);
+        return c.text("There was an error while signing up")
+    }
 })
 
 userRouter.post('/signin',(c)=>{
+
+    const prisma = new PrismaClient({
+        datasourceUrl : c.env.DATABASE_URL
+    }).$extends(withAccelerate())
+
     return c.text("User signs in this page.")
 })
