@@ -1,5 +1,7 @@
 # prod
 dist/
+.env
+wrangler.toml
 
 # dev
 .yarn/
