@@ -33,11 +33,26 @@ userRouter.post('/signup',async (c)=>{
     }
 })
 
-userRouter.post('/signin',(c)=>{
+userRouter.post('/signin',async (c)=>{
 
     const prisma = new PrismaClient({
         datasourceUrl : c.env.DATABASE_URL
     }).$extends(withAccelerate())
 
-    return c.text("User signs in this page.")
+    const body = await c.req.json();
+
+    try{
+        const user = await prisma.user.findUnique({
+            where : {
+                username : body.username,
+                password : body.password
+            }
+        })
+
+        console.log("User logged in")
+        return c.text("Correct credentials")
+    }catch(e){
+        c.status(401)
+        return c.text("User credentials are incorrect or user does not exist.")
+    }
 })
