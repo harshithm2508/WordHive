@@ -1,23 +1,132 @@
+import { PrismaClient } from "@prisma/client/edge";
+import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
+import { decode, verify } from "hono/jwt";
 
-export const blogRouter = new Hono();
+export const blogRouter = new Hono<{
+    Bindings : {
+        DATABASE_URL : string,
+        SECRET_KEY : string
+    },
+    Variables : {
+        userId : string,
+    }
+}>();
 
-blogRouter.post('/',(c)=>{
-    return c.text("User posts blogs at this endpoint")
+blogRouter.use('/*',async (c,next)=>{
+    const authHeader = c.req.header("authorization") || "";
+    try{
+        const user = await verify(authHeader, c.env.SECRET_KEY);
+        if(user){
+            c.set("userId",String(user.id))
+            await next();
+        }else{
+            c.status(403);
+            return c.json({
+                "message" : "You are not logged in"
+            })
+        }
+    }catch(e){
+        c.status(403);
+        return c.json({
+            "message" : "There was an error"
+        })
+    }
 })
 
-blogRouter.put("/",(c)=>{
-    return c.text("User updates his blogs at this endpoint")
+
+//  posting a blog route
+blogRouter.post('/',async (c)=>{
+
+    const body = await c.req.json();
+    const id = await c.get("userId")
+
+    const prisma = new PrismaClient({
+        datasourceUrl : c.env.DATABASE_URL,
+    }).$extends(withAccelerate())
+
+    try{
+        const blog = await prisma.blog.create({
+            data : {
+                title : body.title,
+                content : body.content,
+                authorId : Number(id)
+            }
+        })
+
+        return c.json({
+            id : blog.id
+        })
+    }catch(e){
+        console.log("There was an error in uploading the blog")
+        return c.text("Error")
+    }
 })
 
-blogRouter.get('/bulk', (c)=>{
-    return c.text("Users gets all the blogs at this endpoint.")
+//  Editing a blog route
+blogRouter.put("/",async (c)=>{
+    const body = await c.req.json();
+    const userId = await c.get('userId')
+    const prisma = new PrismaClient({
+        datasourceUrl : c.env.DATABASE_URL,
+    }).$extends(withAccelerate());
+
+    try{
+        const blog = await prisma.blog.update({
+            where : {
+                id : body.id
+            },
+            data : {
+                title : body.title,
+                content : body.content,
+                authorId : Number(userId)
+            }
+        })
+        console.log("error")
+
+        return c.json({
+            id : blog.id
+        })
+    }catch(e){
+        console.log(e)
+        return c.text("There was an error in updating the blog : ");
+    }
 })
 
-blogRouter.get('/:id',(c) => {
-    return c.text("User gets his blog at this endpoint.")
+blogRouter.get('/bulk', async (c)=>{
+    const prisma = new PrismaClient({
+        datasourceUrl : c.env.DATABASE_URL,
+    }).$extends(withAccelerate())
+
+    try{
+        const blogs = await prisma.blog.findMany();
+
+        return c.json({
+            blogs
+        })
+    }catch(e){
+        return c.text("There was an error in getting blogs")
+    }
 })
 
+blogRouter.get('/:id',async (c) => {
+    const id = await c.req.param("id");
+    const prisma = new PrismaClient({
+        datasourceUrl : c.env.DATABASE_URL,
+    }).$extends(withAccelerate());
 
-//  DATABASE_URL : postgresql://wordhive-db_owner:dl5kPYm3sMCQ@ep-crimson-rice-a5e26ahn.us-east-2.aws.neon.tech/wordhive-db?sslmode=require
-//  Pool lin  :     DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiN2NiMzYxOWYtMGNmNS00NWY5LTg3Y2EtODM5ODg5YWY3MTcwIiwidGVuYW50X2lkIjoiYWYzN2EwN2M2NjQyYzZlMjQ4ZjU1NzE2ZjNkMzJkZTRmMWU4M2Y4NTBlMjQzNjUzYzZkMWE5YjQ3YWMxZTY0YyIsImludGVybmFsX3NlY3JldCI6ImE0OTc3OTM0LWMwYjktNGEyOS1iOWYzLWM3ZGI1MjZjNDQ5MSJ9.nR5zx3xc8zBrS9H-TlEtj4sx_ayhvs4N-HPYWxV2xTU"
+    try{
+        const blog = await prisma.blog.findFirst({
+            where : {
+                id : Number(id)
+            }
+        })
+
+        return c.json({
+            blog
+        })
+    }catch(e){
+        console.log("There was an error in getting the blog");
+        return c.status(411);
+    }
+})
