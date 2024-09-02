@@ -1,1 +1,0 @@
-export const DATABASE_URL = 'https://backend.harshithm2508.workers.dev'
