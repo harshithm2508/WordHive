@@ -1,0 +1,1 @@
+export const BACKEND_URL : string = "https://backend.harshithm2508.workers.dev/";
