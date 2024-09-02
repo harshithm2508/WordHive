@@ -1,7 +1,11 @@
+import Quote from "../components/Quote";
+import Auth from "../components/Auth";
+
 function SignUp(){
     return(
-        <div>
-            This is a Sign Up page.
+        <div className=" grid grid-cols-2">
+            <Auth/>
+            <Quote/>
         </div>
     )
 }
