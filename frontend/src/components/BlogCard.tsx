@@ -1,14 +1,17 @@
+import { Link } from "react-router-dom";
+
 interface BlogCardProps{
     authorName : string;
     title : string;
     content : string;
     publishedDate : string
+    id : number
 }
 
 
-export default function BlogCard({authorName, title, content, publishedDate} : BlogCardProps){
+export default function BlogCard({authorName, title, content, publishedDate, id} : BlogCardProps){
     return(
-        <div className=" border-b-2 border-slate-400 px-2 pb-2 mt-4">
+        <div className=" border-b-2 border-slate-400 w-1/2 px-2 pb-2 mt-4">
             <div className=" flex items-center gap-3">
                 <Avatar name={authorName} size={8}/>
                 <Circle/>
@@ -17,7 +20,9 @@ export default function BlogCard({authorName, title, content, publishedDate} : B
                 <div className=" text-slate-500">{publishedDate}</div>
             </div>
             <div className=" pt-2">
-                <div className=" font-bold text-xl">{title}</div>
+                <Link to={`/blog/${id}`}>
+                    <div className=" font-bold text-xl">{title}</div>
+                </Link>
                 <div className=" text-lg text-slate-500">{content}</div>
             </div>
             <div className=" mt-4 font-light text-slate-500">

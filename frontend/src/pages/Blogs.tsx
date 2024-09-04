@@ -1,16 +1,25 @@
 import Appbar from "../components/Appbar";
 import BlogCard from "../components/BlogCard";
+import { useBlogs } from "../hooks";
 
 export default function Blogs() {
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <Appbar />
-            <div className="w-full max-w-2xl">
-                <BlogCard authorName="Harshith Muthangi" title="Hello World" content="loremloremloremloremloremloremloremloremloremlorem" publishedDate="2nd Feb 2024" />
-                <BlogCard authorName="Harshith Muthangi" title="Hello World" content="loremloremloremloremloremloremloremloremloremlorem" publishedDate="2nd Feb 2024" />
-                <BlogCard authorName="Harshith Muthangi" title="Hello World" content="loremloremloremloremloremloremloremloremloremlorem" publishedDate="2nd Feb 2024" />
-                <BlogCard authorName="Harshith Muthangi" title="Hello World" content="loremloremloremloremloremloremloremloremloremlorem" publishedDate="2nd Feb 2024" />
+
+    const { loading, blogs } = useBlogs();
+
+    if(loading){
+        return(
+            <div>
+                Loading....
             </div>
+        )
+    }
+
+    return (
+        <div className="flex flex-col items-center min-h-screen bg-gray-100">
+            <Appbar />
+            {blogs.map((blog)=>{
+                return <BlogCard id={blog.id} authorName={blog.author.name} title={blog.title} content={blog.content} publishedDate="2nd Feb 2024"/>
+            })}
         </div>
     );
 }
