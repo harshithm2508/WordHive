@@ -13,7 +13,7 @@ export default function BlogCard({authorName, title, content, publishedDate, id}
     return(
         <div className=" border-b-2 border-slate-400 w-1/2 px-2 pb-2 mt-4">
             <div className=" flex items-center gap-3">
-                <Avatar name={authorName} size={8}/>
+                <Avatar name={authorName} size={10}/>
                 <Circle/>
                 <div className=" ">{authorName}</div>
                 <Circle/>
