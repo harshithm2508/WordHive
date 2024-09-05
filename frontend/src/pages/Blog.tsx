@@ -1,6 +1,8 @@
 import { useBlog } from "../hooks";
 import { useParams } from "react-router-dom";
 import { FullBlog } from "../components/FullBlog";
+import { Spinner } from "../components/Spinner";
+import Appbar from "../components/Appbar";
 
 function Blog(){
 
@@ -12,7 +14,8 @@ function Blog(){
     if(loading){
         return(
             <div>
-                Loading...
+                <Appbar/>
+                <Spinner/>
             </div>
         )
     }
