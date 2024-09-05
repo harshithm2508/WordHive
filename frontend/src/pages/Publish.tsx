@@ -1,7 +1,7 @@
 import axios from "axios"
 import Appbar from "../components/Appbar"
 import { BACKEND_URL } from "../config"
-import { useState } from "react"
+import { ChangeEvent, useState } from "react"
 
 export const Publish = () =>{
 
@@ -22,10 +22,7 @@ export const Publish = () =>{
                         <input onChange={(e)=>setTitle(e.target.value)} type="email" id="helper-text" aria-describedby="helper-text-explanation" className="block p-2.5 w-full text-md text-gray-900 rounded-lg border-2 border-gray-300" placeholder="Enter you title here."/>
                     </div>
 
-                    <div className=" mt-4">
-                        <label className="block mb-2 text-2xl font-medium text-gray-900">Your Content</label>
-                        <textarea onChange={(e)=>setContent(e.target.value)} id="message" rows={15} className=" block p-2.5 w-full text-md text-gray-900 rounded-lg border-2 border-gray-300" placeholder="Write your thoughts here..."></textarea>
-                    </div>
+                    <Textarea onChangeHandler={(e)=>setContent(e.target.value)}/>
 
 
                     <div className=" mt-4">
@@ -38,5 +35,15 @@ export const Publish = () =>{
                 </div>
             </div>
         </div>
+    )
+}
+
+
+function Textarea({onChangeHandler} : {onChangeHandler : (e : ChangeEvent<HTMLTextAreaElement>) => void} ){
+    return(
+        <div className=" mt-4">
+                        <label className="block mb-2 text-2xl font-medium text-gray-900">Your Content</label>
+                        <textarea onChange={onChangeHandler} id="message" rows={15} className=" block p-2.5 w-full text-md text-gray-900 rounded-lg border-2 border-gray-300" placeholder="Write your thoughts here..."></textarea>
+                    </div>
     )
 }
