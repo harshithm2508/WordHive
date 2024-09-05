@@ -1,6 +1,7 @@
 import Appbar from "../components/Appbar";
 import BlogCard from "../components/BlogCard";
 import { useBlogs } from "../hooks";
+import { BlogSkeleton } from "../components/BlogSkeleton";
 
 export default function Blogs() {
 
@@ -9,7 +10,12 @@ export default function Blogs() {
     if(loading){
         return(
             <div>
-                Loading....
+                <Appbar/>
+                <div className=" flex flex-col items-center">
+                    <BlogSkeleton/>
+                    <BlogSkeleton/>
+                    <BlogSkeleton/>
+                </div>
             </div>
         )
     }
