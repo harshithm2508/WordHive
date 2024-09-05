@@ -3,6 +3,7 @@ import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import Blog from "./pages/Blog";
 import Blogs from './pages/Blogs'
+import { Publish } from "./pages/Publish";
 
 function App(){
   return(
@@ -12,7 +13,7 @@ function App(){
         <Route path="/signin" element={<SignIn/>}></Route>
         <Route path="/blog/:id" element={<Blog/>}></Route>
         <Route path="/blogs" element={<Blogs/>}></Route>
-        <Route></Route>
+        <Route path="/publish" element={<Publish/>}></Route>
       </Routes>
     </BrowserRouter>
   )
