@@ -23,7 +23,7 @@ export default function BlogCard({authorName, title, content, publishedDate, id}
                 <Link to={`/blog/${id}`}>
                     <div className=" font-bold text-xl">{title}</div>
                 </Link>
-                <div className=" text-lg text-slate-500">{content.split(" ").length > 50 ? "........." : content}</div>
+                <div className=" text-lg text-slate-500">{content.split(" ").length > 50 ? content.split(" ").slice(0, 50).join(' ') + '...' : content}</div>
             </div>
             <div className=" mt-4 font-light text-slate-500">
                     {`${Math.ceil(content.length/100)} minutes read`}
