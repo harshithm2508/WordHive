@@ -3,12 +3,15 @@ import { SignUpInput } from "@harshithm2508/wordhivecommon";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
+import { Spinner } from "./Spinner";
 
 
 function Auth({type} : {type : 'signin' | 'signup'}){
 
 
     const navigate = useNavigate();
+
+    const [ loading, setLoading ] = useState(false);
 
     const [postInputs, setPostInputs] = useState<SignUpInput>({
         name : "",
@@ -17,6 +20,7 @@ function Auth({type} : {type : 'signin' | 'signup'}){
     })
 
     async function sendRequest(){
+        setLoading(true);
         try{
                 const response = await axios.post(`${BACKEND_URL}api/v1/user/${type === 'signin' ? 'signin' :'signup'}`,postInputs);
                 const jwt = response.data;
@@ -24,8 +28,13 @@ function Auth({type} : {type : 'signin' | 'signup'}){
                 navigate('/blogs');
             }
         catch(e){
-
+            alert("Wrong Credentials")
+            setLoading(false);
         }
+    }
+
+    if(loading){
+        return <Spinner/>
     }
 
     return(
